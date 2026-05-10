@@ -8,6 +8,7 @@ $db   = "pengolahan krs&khs"; // GANTI dengan nama database Anda yang sebenarnya
 // 2. BARU LAKUKAN KONEKSI
 $koneksi = mysqli_connect($host, $user, $pass, $db);
 
+
 // Cek koneksi
 if (!$koneksi) {
     die("Koneksi gagal: " . mysqli_connect_error());
