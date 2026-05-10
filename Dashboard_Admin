@@ -1,0 +1,345 @@
+<?php
+session_start();
+
+// Cek apakah session sudah ada, jika tidak, tendang ke login
+if (!isset($_SESSION['status']) || $_SESSION['status'] != "login") {
+    header("Location: Login_admin.php");
+    exit();
+}
+?>
+
+<!-- HTML Dashboard Kamu Mulai Dari Sini -->
+
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard Admin | Sistem KRS & KHS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <script src="https://kit.fontawesome.com/a2d9d6c5f8.js" crossorigin="anonymous"></script>
+  <style>
+    :root { 
+      --sidebar-bg: #0f172a; 
+      --accent-blue: #3b82f6; 
+      --text-gray: #94a3b8;
+    }
+    
+    body { background-color: #f1f5f9; font-family: 'Segoe UI', sans-serif; }
+    
+    .sidebar { 
+      height: 100vh; 
+      width: 260px; 
+      background-color: var(--sidebar-bg); 
+      position: fixed; 
+      color: #fff; 
+      z-index: 1000;
+      padding-top: 20px;
+    }
+
+    .brand-section {
+      padding: 0 20px 30px 20px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .brand-logo { width: 45px; margin-right: 12px; }
+    .brand-title { font-size: 1rem; font-weight: 700; line-height: 1.2; margin: 0; color: #fff; }
+    .brand-subtitle { font-size: 0.75rem; color: var(--text-gray); margin: 0; }
+
+    .sidebar a { 
+      color: var(--text-gray); 
+      text-decoration: none; 
+      display: flex; 
+      align-items: center; 
+      padding: 12px 20px; 
+      border-radius: 8px; 
+      margin: 5px 15px; 
+      transition: 0.3s; 
+      font-size: 0.95rem;
+    }
+    
+    .sidebar a i { font-size: 1.1rem; margin-right: 12px; }
+    .sidebar a.active, .sidebar a:hover { background-color: #1e293b; color: #fff; }
+    .sidebar a.active { color: var(--accent-blue); font-weight: 600; }
+
+    .content { margin-left: 260px; padding: 30px; width: calc(100% - 260px); }
+    .card-custom { border-radius: 12px; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.05); background: #fff; }
+    
+    section { display: none; }
+    section.active-section { display: block; animation: fadeIn 0.4s ease; }
+    
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  </style>
+</head>
+<body>
+
+<div class="d-flex">
+  <div class="sidebar">
+    <div class="brand-section">
+      <img src="logo poltek.png" class="brand-logo" alt="Logo">
+      <div>
+        <h1 class="brand-title">Si Pekas<br>Polibatam</h1>
+        <p class="brand-subtitle">Dashboard Admin</p>
+      </div>
+    </div>
+
+    <nav>
+      <a href="javascript:void(0)" class="nav-link-admin active" data-target="dash">
+        <i class="bi bi-speedometer2"></i> Dashboard
+      </a>
+      <a href="javascript:void(0)" class="nav-link-admin" data-target="data-matkul">
+        <i class="bi bi-journal-bookmark-fill"></i> Kelola Matakuliah
+      </a>
+      <a href="javascript:void(0)" class="nav-link-admin" data-target="data-pengguna">
+        <i class="bi bi-people-fill"></i> Kelola Pengguna
+      </a>
+      <hr class="mx-3 border-secondary">
+      <a href="#" class="text-warning" onclick="logout()">
+        <i class="bi bi-box-arrow-right"></i> Keluar
+      </a>
+    </nav>
+  </div>
+
+  <div class="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h4 class="fw-bold">Dashboard Admin</h4>
+        <p class="text-muted small">Selamat Datang Admin, Otoritas penuh pengelolaan data sistem KRS & KHS</p>
+      </div>
+      <span class="badge bg-dark px-3 py-2">Role: Admin</span>
+    </div>
+
+    <section id="dash" class="active-section">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <div class="card card-custom p-4 border-start border-primary border-5">
+            <h6 class="text-muted small fw-bold">TOTAL MAHASISWA</h6>
+            <h3 class="fw-bold" id="count-mhs">0</h3>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card card-custom p-4 border-start border-success border-5">
+            <h6 class="text-muted small fw-bold">TOTAL DOSEN</h6>
+            <h3 class="fw-bold" id="count-dsn">0</h3>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card card-custom p-4 border-start border-warning border-5">
+            <h6 class="text-muted small fw-bold">TOTAL MATAKULIAH</h6>
+            <h3 class="fw-bold" id="count-matkul">0</h3>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="data-matkul">
+      <div class="card card-custom p-4 mb-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-plus-circle me-2"></i>Tambah Mata Kuliah Baru</h5>
+        <form class="row g-3" id="form-matkul">
+          <div class="col-md-2">
+            <label class="form-label small fw-bold">Kode</label>
+            <input type="text" class="form-control" id="kode" placeholder="IF101" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-bold">Nama Mata Kuliah</label>
+            <input type="text" class="form-control" id="nama-matkul" placeholder="Contoh: Basis Data" required>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label small fw-bold">SKS</label>
+            <input type="number" class="form-control" id="sks" placeholder="2-4" required>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label small fw-bold">Semester</label>
+            <input type="number" class="form-control" id="semester" placeholder="1-8" required>
+          </div>
+          <div class="col-md-2 d-flex align-items-end">
+            <button type="button" class="btn btn-primary w-100" onclick="addMatkul()">Simpan</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card card-custom p-4">
+        <h5 class="fw-bold mb-3">Daftar Mata Kuliah Tersedia</h5>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Kode</th>
+                <th>Mata Kuliah (Semester)</th>
+                <th class="text-center">SKS</th>
+                <th class="text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="table-body-matkul"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="data-pengguna">
+      <div class="card card-custom p-4 mb-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-person-plus-fill me-2"></i>Registrasi Pengguna Baru</h5>
+        <form class="row g-3" id="form-user">
+          <div class="col-md-3">
+            <label class="form-label small fw-bold">ID (NIM/NIDN)</label>
+            <input type="text" class="form-control" id="user-id" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-bold">Nama Lengkap</label>
+            <input type="text" class="form-control" id="user-name" required>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small fw-bold">Peran (Role)</label>
+            <select class="form-select" id="user-role">
+              <option value="mahasiswa">Mahasiswa</option>
+              <option value="dosen">Dosen</option>
+            </select>
+          </div>
+          <div class="col-md-2 d-flex align-items-end">
+            <button type="button" class="btn btn-success w-100" onclick="addUser()">Daftarkan</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card card-custom p-4">
+        <ul class="nav nav-tabs mb-3" id="userTabs" role="tablist">
+          <li class="nav-item">
+            <button class="nav-link active fw-bold" data-bs-toggle="tab" data-bs-target="#mhs-list" type="button">Data Mahasiswa</button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link fw-bold" data-bs-toggle="tab" data-bs-target="#dsn-list" type="button">Data Dosen</button>
+          </li>
+        </ul>
+        <div class="tab-content">
+          <div class="tab-pane fade show active" id="mhs-list">
+            <table class="table table-hover align-middle">
+              <thead><tr class="text-muted"><th>NIM</th><th>Nama Mahasiswa</th><th>Aksi</th></tr></thead>
+              <tbody id="table-mhs"></tbody>
+            </table>
+          </div>
+          <div class="tab-pane fade" id="dsn-list">
+            <table class="table table-hover align-middle">
+              <thead><tr class="text-muted"><th>NIDN</th><th>Nama Dosen</th><th>Aksi</th></tr></thead>
+              <tbody id="table-dsn"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Inisialisasi Data dari LocalStorage saat halaman dibuka
+  document.addEventListener('DOMContentLoaded', () => {
+    loadData();
+    renderTables();
+  });
+
+  // Database Sementara (LocalStorage)
+  let db = {
+    matkul: JSON.parse(localStorage.getItem('db_matkul')) || [],
+    mhs: JSON.parse(localStorage.getItem('db_mhs')) || [],
+    dsn: JSON.parse(localStorage.getItem('db_dsn')) || []
+  };
+
+  function saveData() {
+    localStorage.setItem('db_matkul', JSON.stringify(db.matkul));
+    localStorage.setItem('db_mhs', JSON.stringify(db.mhs));
+    localStorage.setItem('db_dsn', JSON.stringify(db.dsn));
+    updateDashCounters();
+  }
+
+  function updateDashCounters() {
+    document.getElementById('count-mhs').innerText = db.mhs.length;
+    document.getElementById('count-dsn').innerText = db.dsn.length;
+    document.getElementById('count-matkul').innerText = db.matkul.length;
+  }
+
+  function renderTables() {
+    // Render Matkul
+    const tableMatkul = document.getElementById('table-body-matkul');
+    tableMatkul.innerHTML = db.matkul.map((item, index) => `
+      <tr>
+        <td class="fw-bold">${item.kode}</td>
+        <td>${item.nama} (Sem ${item.sem})</td>
+        <td class="text-center">${item.sks}</td>
+        <td class="text-center"><button class="btn btn-sm btn-outline-danger" onclick="deleteData('matkul', ${index})"><i class="bi bi-trash"></i></button></td>
+      </tr>
+    `).join('');
+
+    // Render MHS
+    document.getElementById('table-mhs').innerHTML = db.mhs.map((item, index) => `
+      <tr><td>${item.id}</td><td>${item.name}</td><td><button class="btn btn-sm btn-outline-danger" onclick="deleteData('mhs', ${index})"><i class="bi bi-trash"></i></button></td></tr>
+    `).join('');
+
+    // Render DSN
+    document.getElementById('table-dsn').innerHTML = db.dsn.map((item, index) => `
+      <tr><td>${item.id}</td><td>${item.name}</td><td><button class="btn btn-sm btn-outline-danger" onclick="deleteData('dsn', ${index})"><i class="bi bi-trash"></i></button></td></tr>
+    `).join('');
+
+    updateDashCounters();
+  }
+
+  function addMatkul() {
+    const kode = document.getElementById('kode').value;
+    const nama = document.getElementById('nama-matkul').value;
+    const sks = document.getElementById('sks').value;
+    const sem = document.getElementById('semester').value;
+
+    if (kode && nama && sks && sem) {
+      db.matkul.push({ kode, nama, sks, sem });
+      saveData();
+      renderTables();
+      document.getElementById('form-matkul').reset();
+    } else { alert("Mohon lengkapi semua data!"); }
+  }
+
+  function addUser() {
+    const id = document.getElementById('user-id').value;
+    const name = document.getElementById('user-name').value;
+    const role = document.getElementById('user-role').value;
+
+    if (id && name) {
+      const target = role === 'mahasiswa' ? 'mhs' : 'dsn';
+      db[target].push({ id, name });
+      saveData();
+      renderTables();
+      document.getElementById('form-user').reset();
+      alert(`Berhasil mendaftarkan ${role}!`);
+    } else { alert("ID dan Nama wajib diisi!"); }
+  }
+
+  function deleteData(type, index) {
+    if(confirm("Hapus data ini secara permanen?")) {
+      db[type].splice(index, 1);
+      saveData();
+      renderTables();
+    }
+  }
+
+  // Logika Navigasi Sidebar
+  const links = document.querySelectorAll('.nav-link-admin');
+  const sections = document.querySelectorAll('section');
+
+  links.forEach(link => {
+    link.addEventListener('click', function() {
+      links.forEach(l => l.classList.remove('active'));
+      this.classList.add('active');
+      sections.forEach(s => s.classList.remove('active-section'));
+      document.getElementById(this.getAttribute('data-target')).classList.add('active-section');
+    });
+  });
+
+  function logout() {
+    if(confirm("Keluar dari panel admin?")) alert("Sesi berakhir.");
+  window.location.href = "Login_admin.php"; 
+  }
+</script>
+
+</body>
+</html>
