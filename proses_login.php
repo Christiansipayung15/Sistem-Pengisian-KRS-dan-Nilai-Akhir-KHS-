@@ -10,6 +10,7 @@ if (isset($_POST['login'])) {
     $query = mysqli_query($koneksi, "SELECT * FROM users WHERE username='$username'");
     $data = mysqli_fetch_assoc($query);
 
+    
     if ($data) {
         // Cek apakah password yang diketik sesuai dengan password di database
         if (password_verify($password, $data['password'])) {
