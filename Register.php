@@ -66,6 +66,7 @@
                 input.placeholder = 'Masukkan NIDN';
             }
         }
+        
     </script>
 </body>
 </html>
