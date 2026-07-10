@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
-class Controller
+abstract class Controller
 {
-    //
+    // File induk untuk semua controller kamu
 }

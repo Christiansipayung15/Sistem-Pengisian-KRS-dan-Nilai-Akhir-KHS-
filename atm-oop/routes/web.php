@@ -13,6 +13,10 @@ Route::get('/', function () {
 Route::get('/atm', [ATMController::class, 'demo']);
 // Pastikan formatnya seperti ini
 Route::get('/login', [LoginController::class, 'index']);
-Route::get('/krs', [krsController::class, 'index']);
+// Rute untuk Export PDF
+    Route::get('/krs/export', [App\Http\Controllers\dashboard_mahasiswaController::class, 'exportKrsPdf'])
+         ->name('krs.export');
+         Route::post('/krs/simpan', [App\Http\Controllers\dashboard_mahasiswaController::class, 'simpanKrs'])
+         ->name('krs.simpan');
 Route::get('/pengolahan_krs_dan_khs', [KrsKhsController::class, 'index']);
 
